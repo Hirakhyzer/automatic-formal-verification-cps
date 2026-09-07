@@ -1,0 +1,1 @@
+{"description":"Illustrative stress configuration; increase attack_scale while retaining all other model assumptions.","attack_scales":[0.0,0.5,1.0,2.0,4.0,8.0]}

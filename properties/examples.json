@@ -1,0 +1,9 @@
+{
+  "note": "Illustrative property metadata. Runtime domain properties are defined in src/cpsverify/domains.",
+  "properties": [
+    {"domain":"battery","name":"temperature_below_60C"},
+    {"domain":"water","name":"avoid_overflow_region"},
+    {"domain":"robot","name":"avoid_obstacle"},
+    {"domain":"railway","name":"minimum_separation_50m"}
+  ]
+}
