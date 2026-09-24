@@ -6,7 +6,7 @@ This repository is a PhD-oriented research framework for asking a stronger quest
 
 > Given a mathematical CPS model, an uncertain initial set, bounded inputs/disturbances, a finite horizon, and an unsafe state set, can we prove that the entire reachable over-approximation remains outside the unsafe region?
 
-The v0.1 core focuses on **discrete-time affine systems**, because its verification semantics can be stated precisely and tested rigorously. It provides outward-rounded interval propagation, zonotope propagation with conservative reduction, hybrid-mode orchestration, unsafe-set checking, candidate witness regions, bounded cyber/fault effects, verification-margin experiments, and four reduced-order CPS domains.
+The v0.1 core focuses on **discrete-time affine systems**, because its verification semantics can be stated precisely and tested rigorously. It provides outward-rounded interval propagation, zonotope propagation with conservative reduction, hybrid-mode orchestration, unsafe-set checking, candidate witness regions, bounded cyber/fault effects, verification-margin experiments, four reduced-order CPS domains, and auditable verification evidence manifests.
 
 ## Verification semantics
 
@@ -111,6 +111,22 @@ STATUS: VERIFIED_SAFE
 
 The numeric result is a property of the included synthetic model and specified bounds—not a statement about a physical battery.
 
+## Verification evidence manifests
+
+Verification results can now be exported together with their assumptions and reproducibility context:
+
+```bash
+cpsverify battery \
+  --method interval \
+  --evidence-manifest artifacts/battery-evidence.json
+```
+
+The manifest records the schema version, run identity, Git commit when available, model boundary, property, method configuration, finite horizon, explicit assumptions, uncertainty description, verification completeness, intersection/witness metadata, Python/runtime context, and the exact verification request.
+
+This separates a **proof result** from the **evidence needed to interpret that proof**. An `UNKNOWN` result is explicitly marked incomplete, while `VERIFIED_SAFE` remains conditional on the recorded model and assumptions.
+
+See [`docs/verification-evidence-manifest.md`](docs/verification-evidence-manifest.md) and [`schemas/verification-evidence.schema.json`](schemas/verification-evidence.schema.json).
+
 ## Research experiments
 
 The repository supports:
@@ -122,7 +138,8 @@ The repository supports:
 5. hybrid mode/guard branching;
 6. candidate witness-region extraction;
 7. scaling with state dimension and horizon;
-8. future digital-twin-informed bound tightening.
+8. verification-evidence provenance and assumption auditing;
+9. future digital-twin-informed bound tightening.
 
 A particularly important comparison is **verification vs sampling**. Thousands of sampled trajectories remaining safe do not prove safety, while a sound reachable-set over-approximation can prove a finite-horizon property under the stated assumptions.
 
@@ -130,19 +147,22 @@ A particularly important comparison is **verification vs sampling**. Thousands o
 
 ```text
 src/cpsverify/
-  sets/             interval and zonotope representations
-  models/           affine and hybrid CPS models
-  reachability/     interval, zonotope, and hybrid propagation
-  properties/       unsafe-set checking and verification status
-  uncertainty/      bounded cyber/fault/parameter effects
-  counterexample/   witness-region and sampling helpers
-  domains/          battery, water, robot, railway abstractions
-  benchmarks/       sampling and verified-margin experiments
-  visualization/    optional flowpipe plots
-  io/               configuration helpers
+  sets/               interval and zonotope representations
+  models/             affine and hybrid CPS models
+  reachability/       interval, zonotope, and hybrid propagation
+  properties/         unsafe-set checking and verification status
+  uncertainty/        bounded cyber/fault/parameter effects
+  counterexample/     witness-region and sampling helpers
+  domains/            battery, water, robot, railway abstractions
+  benchmarks/         sampling and verified-margin experiments
+  visualization/      optional flowpipe plots
+  io/                 configuration helpers
+  evidence_manifest.py auditable verification provenance export
+schemas/
+  verification-evidence.schema.json
 ```
 
-See `docs/` for the formal-semantics boundary, threat model, benchmark protocol, domain assumptions, research questions, limitations, and roadmap.
+See `docs/` for the formal-semantics boundary, threat model, benchmark protocol, domain assumptions, research questions, limitations, roadmap, and evidence-manifest protocol.
 
 ## Scientific integrity boundary
 
@@ -152,7 +172,8 @@ This project intentionally distinguishes:
 - **potential unsafe intersection** from a concrete counterexample;
 - **synthetic reduced-order models** from measurements;
 - **bounded abstract cyber effects** from real attack procedures;
-- **finite-horizon verification** from real-world certification.
+- **finite-horizon verification** from real-world certification;
+- **verification status** from the assumptions and provenance required to interpret it.
 
 ## Relationship to the PhD program
 
