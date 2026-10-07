@@ -1,4 +1,5 @@
 from dataclasses import dataclass, asdict
+from cpsverify.diagnostics import diagnose_intersection
 from cpsverify.domains import get_case
 from cpsverify.reachability import reach_interval, reach_zonotope
 from cpsverify.properties import check_safety
@@ -28,9 +29,22 @@ class VerificationReport:
     assumptions: list[str]
     overlap: dict | None
     model_notes: str
+    intersection_diagnostic: dict | None = None
 
     def to_dict(self):
         return asdict(self)
+
+
+def _intersection_diagnostic(flowpipe, prop, step: int | None):
+    if step is None:
+        return None
+    for item in flowpipe.sets:
+        if item.step != step:
+            continue
+        reachable = item.set.interval_hull() if hasattr(item.set, "interval_hull") else item.set
+        diagnostic = diagnose_intersection(reachable, prop.unsafe_set)
+        return diagnostic.to_dict() if diagnostic is not None else None
+    return None
 
 
 class VerificationEngine:
@@ -45,6 +59,7 @@ class VerificationEngine:
             raise ValueError("method must be 'interval' or 'zonotope'")
         prop = case.properties[request.property_index]
         result = check_safety(fp, prop)
+        diagnostic = _intersection_diagnostic(fp, prop, result.first_intersection_step)
         return VerificationReport(
             case.name,
             request.method,
@@ -58,4 +73,5 @@ class VerificationEngine:
             fp.assumptions,
             result.overlap.to_dict() if result.overlap is not None else None,
             case.notes,
+            diagnostic,
         )
