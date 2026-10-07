@@ -3,64 +3,21 @@
   "$id": "https://github.com/Hirakhyzer/automatic-formal-verification-cps/schemas/verification-evidence.schema.json",
   "title": "CPS Verification Evidence Manifest",
   "type": "object",
-  "required": [
-    "schema_version",
-    "run_id",
-    "timestamp_utc",
-    "domain",
-    "model",
-    "property",
-    "method",
-    "horizon",
-    "assumptions",
-    "uncertainty",
-    "result",
-    "reproducibility"
-  ],
+  "required": ["schema_version", "run_id", "evidence_fingerprint_sha256", "timestamp_utc", "domain", "model", "property", "method", "horizon", "assumptions", "uncertainty", "result", "reproducibility"],
   "properties": {
     "schema_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
     "run_id": {"type": "string", "minLength": 1},
+    "evidence_fingerprint_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "timestamp_utc": {"type": "string", "format": "date-time"},
     "git_commit": {"type": ["string", "null"]},
     "domain": {"type": "string", "minLength": 1},
-    "model": {
-      "type": "object",
-      "required": ["name", "representation", "parameter_source", "notes"],
-      "properties": {
-        "name": {"type": "string"},
-        "representation": {"type": "string"},
-        "parameter_source": {"type": "string"},
-        "notes": {"type": "string"}
-      },
-      "additionalProperties": true
-    },
-    "property": {
-      "type": "object",
-      "required": ["name", "unsafe_set", "semantics"],
-      "properties": {
-        "name": {"type": "string"},
-        "unsafe_set": {"type": "string"},
-        "semantics": {"type": "string"}
-      },
-      "additionalProperties": true
-    },
-    "method": {
-      "type": "object",
-      "required": ["name", "configuration", "soundness_boundary"],
-      "properties": {
-        "name": {"type": "string"},
-        "configuration": {"type": "object"},
-        "soundness_boundary": {"type": "string"}
-      },
-      "additionalProperties": true
-    },
+    "model": {"type": "object", "required": ["name", "representation", "parameter_source", "notes"], "additionalProperties": true},
+    "property": {"type": "object", "required": ["name", "unsafe_set", "semantics"], "additionalProperties": true},
+    "method": {"type": "object", "required": ["name", "configuration", "soundness_boundary"], "additionalProperties": true},
     "horizon": {
       "type": "object",
       "required": ["steps", "time"],
-      "properties": {
-        "steps": {"type": "integer", "minimum": 1},
-        "time": {"type": "number", "exclusiveMinimum": 0}
-      },
+      "properties": {"steps": {"type": "integer", "minimum": 1}, "time": {"type": "number", "exclusiveMinimum": 0}},
       "additionalProperties": false
     },
     "assumptions": {
@@ -70,25 +27,14 @@
         "type": "object",
         "required": ["id", "statement", "status", "evidence"],
         "properties": {
-          "id": {"type": "string"},
-          "statement": {"type": "string"},
+          "id": {"type": "string"}, "statement": {"type": "string"},
           "status": {"enum": ["explicit", "validated", "unvalidated", "violated"]},
           "evidence": {"type": "string"}
         },
         "additionalProperties": true
       }
     },
-    "uncertainty": {
-      "type": "object",
-      "required": ["initial_set", "input_bounds", "disturbance_bounds", "cyber_effect_bounds"],
-      "properties": {
-        "initial_set": {"type": "string"},
-        "input_bounds": {"type": "string"},
-        "disturbance_bounds": {"type": "string"},
-        "cyber_effect_bounds": {"type": "string"}
-      },
-      "additionalProperties": true
-    },
+    "uncertainty": {"type": "object", "required": ["initial_set", "input_bounds", "disturbance_bounds", "cyber_effect_bounds"], "additionalProperties": true},
     "result": {
       "type": "object",
       "required": ["status", "complete", "reason", "notes"],
@@ -98,22 +44,26 @@
         "first_intersection_step": {"type": ["integer", "null"], "minimum": 0},
         "first_intersection_time": {"type": ["number", "null"], "minimum": 0},
         "candidate_witness_region": {"type": ["object", "null"]},
-        "reason": {"type": "string"},
-        "notes": {"type": "string"}
+        "intersection_diagnostic": {
+          "type": ["object", "null"],
+          "properties": {
+            "dimension": {"type": "integer", "minimum": 1},
+            "overlap_widths": {"type": "array", "items": {"type": "number", "minimum": 0}},
+            "overlap_volume": {"type": "number", "minimum": 0},
+            "reachable_volume": {"type": "number", "minimum": 0},
+            "unsafe_volume": {"type": "number", "minimum": 0},
+            "reachable_overlap_fraction": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+            "unsafe_overlap_fraction": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+            "candidate_center": {"type": "array", "items": {"type": "number"}},
+            "point_intersection": {"type": "boolean"}
+          },
+          "additionalProperties": false
+        },
+        "reason": {"type": "string"}, "notes": {"type": "string"}
       },
       "additionalProperties": true
     },
-    "reproducibility": {
-      "type": "object",
-      "required": ["python_version", "platform", "configuration_path", "verification_request"],
-      "properties": {
-        "python_version": {"type": "string"},
-        "platform": {"type": "string"},
-        "configuration_path": {"type": ["string", "null"]},
-        "verification_request": {"type": "object"}
-      },
-      "additionalProperties": true
-    }
+    "reproducibility": {"type": "object", "required": ["python_version", "platform", "configuration_path", "verification_request"], "additionalProperties": true}
   },
   "additionalProperties": true
 }
