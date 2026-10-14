@@ -47,27 +47,31 @@ def _intersection_diagnostic(flowpipe, prop, step: int | None):
     return None
 
 
-def _validate_request(request: VerificationRequest, property_count: int) -> None:
+def _validate_request_shape(request: VerificationRequest) -> None:
     if request.method not in {"interval", "zonotope"}:
         raise ValueError("method must be 'interval' or 'zonotope'")
     if request.steps is not None and request.steps < 1:
         raise ValueError("steps must be a positive integer")
     if request.attack_scale < 0:
         raise ValueError("attack_scale must be non-negative")
-    if request.property_index < 0 or request.property_index >= property_count:
-        raise ValueError(
-            f"property_index must be between 0 and {property_count - 1} for domain '{request.domain}'"
-        )
+    if request.property_index < 0:
+        raise ValueError("property_index must be non-negative")
     if request.max_generators < 1:
         raise ValueError("max_generators must be a positive integer")
 
 
+def _validate_property_index(request: VerificationRequest, property_count: int) -> None:
+    if request.property_index >= property_count:
+        raise ValueError(
+            f"property_index must be between 0 and {property_count - 1} for domain '{request.domain}'"
+        )
+
+
 class VerificationEngine:
     def verify(self, request: VerificationRequest) -> VerificationReport:
-        # Load the domain before validating the property index so the error can
-        # report the actual number of properties available for that domain.
+        _validate_request_shape(request)
         case = get_case(request.domain, attack_scale=request.attack_scale)
-        _validate_request(request, len(case.properties))
+        _validate_property_index(request, len(case.properties))
         steps = request.steps if request.steps is not None else case.default_steps
         if request.method == "interval":
             fp = reach_interval(case.system, case.initial_set, steps)
