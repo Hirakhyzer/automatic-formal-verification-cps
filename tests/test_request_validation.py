@@ -6,7 +6,7 @@ from cpsverify.engine import VerificationEngine, VerificationRequest
 
 
 @pytest.mark.parametrize(
-    "request,message",
+    "verification_request,message",
     [
         (VerificationRequest("battery", "invalid"), "method"),
         (VerificationRequest("battery", steps=0), "steps"),
@@ -15,16 +15,16 @@ from cpsverify.engine import VerificationEngine, VerificationRequest
         (VerificationRequest("battery", "zonotope", max_generators=0), "max_generators"),
     ],
 )
-def test_invalid_request_shape_fails_before_reachability(request, message) -> None:
+def test_invalid_request_shape_fails_before_reachability(verification_request, message) -> None:
     with pytest.raises(ValueError, match=message):
-        VerificationEngine().verify(request)
+        VerificationEngine().verify(verification_request)
 
 
 def test_out_of_range_property_index_has_domain_specific_error() -> None:
-    request = VerificationRequest("battery", property_index=999)
+    verification_request = VerificationRequest("battery", property_index=999)
 
     with pytest.raises(ValueError, match="property_index.*battery"):
-        VerificationEngine().verify(request)
+        VerificationEngine().verify(verification_request)
 
 
 @pytest.mark.parametrize("steps", [True, -1, 1.5, "10"])
