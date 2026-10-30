@@ -1,4 +1,6 @@
 from dataclasses import dataclass, asdict
+import math
+
 from cpsverify.diagnostics import diagnose_intersection
 from cpsverify.domains import get_case
 from cpsverify.reachability import reach_interval, reach_zonotope
@@ -47,16 +49,34 @@ def _intersection_diagnostic(flowpipe, prop, step: int | None):
     return None
 
 
+def _is_int(value: object) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _finite_number(value: object, name: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{name} must be a finite number")
+    numeric = float(value)
+    if not math.isfinite(numeric):
+        raise ValueError(f"{name} must be a finite number")
+    return numeric
+
+
 def _validate_request_shape(request: VerificationRequest) -> None:
+    if not isinstance(request.domain, str) or not request.domain.strip():
+        raise ValueError("domain must be a non-empty string")
     if request.method not in {"interval", "zonotope"}:
         raise ValueError("method must be 'interval' or 'zonotope'")
-    if request.steps is not None and request.steps < 1:
+    if request.steps is not None and (not _is_int(request.steps) or request.steps < 1):
         raise ValueError("steps must be a positive integer")
-    if request.attack_scale < 0:
+
+    attack_scale = _finite_number(request.attack_scale, "attack_scale")
+    if attack_scale < 0:
         raise ValueError("attack_scale must be non-negative")
-    if request.property_index < 0:
-        raise ValueError("property_index must be non-negative")
-    if request.max_generators < 1:
+
+    if not _is_int(request.property_index) or request.property_index < 0:
+        raise ValueError("property_index must be a non-negative integer")
+    if not _is_int(request.max_generators) or request.max_generators < 1:
         raise ValueError("max_generators must be a positive integer")
 
 
