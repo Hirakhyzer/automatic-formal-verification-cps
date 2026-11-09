@@ -65,7 +65,7 @@ def _finite_number(value: object, name: str) -> float:
 def _validate_request_shape(request: VerificationRequest) -> None:
     if not isinstance(request.domain, str) or not request.domain.strip():
         raise ValueError("domain must be a non-empty string")
-    if request.method not in {"interval", "zonotope"}:
+    if not isinstance(request.method, str) or request.method not in {"interval", "zonotope"}:
         raise ValueError("method must be 'interval' or 'zonotope'")
     if request.steps is not None and (not _is_int(request.steps) or request.steps < 1):
         raise ValueError("steps must be a positive integer")
@@ -89,6 +89,8 @@ def _validate_property_index(request: VerificationRequest, property_count: int) 
 
 class VerificationEngine:
     def verify(self, request: VerificationRequest) -> VerificationReport:
+        if not isinstance(request, VerificationRequest):
+            raise ValueError("request must be a VerificationRequest")
         _validate_request_shape(request)
         case = get_case(request.domain, attack_scale=request.attack_scale)
         _validate_property_index(request, len(case.properties))
