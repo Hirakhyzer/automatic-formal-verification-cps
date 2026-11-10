@@ -56,7 +56,10 @@ def _is_int(value: object) -> bool:
 def _finite_number(value: object, name: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValueError(f"{name} must be a finite number")
-    numeric = float(value)
+    try:
+        numeric = float(value)
+    except OverflowError as exc:
+        raise ValueError(f"{name} must be a finite number") from exc
     if not math.isfinite(numeric):
         raise ValueError(f"{name} must be a finite number")
     return numeric
