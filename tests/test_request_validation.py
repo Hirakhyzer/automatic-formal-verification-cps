@@ -33,7 +33,7 @@ def test_steps_requires_positive_integer(steps) -> None:
         VerificationEngine().verify(VerificationRequest("battery", steps=steps))
 
 
-@pytest.mark.parametrize("attack_scale", [math.nan, math.inf, -math.inf, True, "1.0"])
+@pytest.mark.parametrize("attack_scale", [math.nan, math.inf, -math.inf, True, "1.0", 10**1000])
 def test_attack_scale_requires_finite_number(attack_scale) -> None:
     with pytest.raises(ValueError, match="attack_scale must be a finite number"):
         VerificationEngine().verify(VerificationRequest("battery", attack_scale=attack_scale))
