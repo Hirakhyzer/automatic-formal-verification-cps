@@ -12,6 +12,7 @@ def build_parser():
     p.add_argument("domain", choices=list_cases())
     p.add_argument("--method", choices=["interval", "zonotope"], default="interval")
     p.add_argument("--steps", type=int)
+    p.add_argument("--max-generators", type=int, default=50, help="Maximum zonotope generators")
     p.add_argument("--property-index", type=int, default=0, help="Zero-based safety property index")
     p.add_argument("--attack-scale", type=float, default=1.0)
     p.add_argument("--json", action="store_true")
@@ -29,6 +30,7 @@ def main(argv=None):
         method=args.method,
         steps=args.steps,
         property_index=args.property_index,
+        max_generators=args.max_generators,
         attack_scale=args.attack_scale,
     )
     report = VerificationEngine().verify(request)
