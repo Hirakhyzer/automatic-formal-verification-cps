@@ -12,6 +12,8 @@ def build_parser():
     p.add_argument("domain", choices=list_cases())
     p.add_argument("--method", choices=["interval", "zonotope"], default="interval")
     p.add_argument("--steps", type=int)
+    p.add_argument("--max-generators", type=int, default=50, help="Maximum zonotope generators")
+    p.add_argument("--property-index", type=int, default=0, help="Zero-based safety property index")
     p.add_argument("--attack-scale", type=float, default=1.0)
     p.add_argument("--json", action="store_true")
     p.add_argument(
@@ -22,14 +24,20 @@ def build_parser():
 
 
 def main(argv=None):
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
     request = VerificationRequest(
         domain=args.domain,
         method=args.method,
         steps=args.steps,
+        property_index=args.property_index,
+        max_generators=args.max_generators,
         attack_scale=args.attack_scale,
     )
-    report = VerificationEngine().verify(request)
+    try:
+        report = VerificationEngine().verify(request)
+    except ValueError as exc:
+        parser.error(str(exc))
 
     if args.json:
         print(json.dumps(report.to_dict(), indent=2))
@@ -43,7 +51,9 @@ def main(argv=None):
 
     if args.evidence_manifest:
         manifest = build_evidence_manifest(report, request)
-        Path(args.evidence_manifest).write_text(
+        output = Path(args.evidence_manifest)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(
             json.dumps(manifest, indent=2) + "\n",
             encoding="utf-8",
         )
