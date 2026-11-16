@@ -47,7 +47,9 @@ def main(argv=None):
 
     if args.evidence_manifest:
         manifest = build_evidence_manifest(report, request)
-        Path(args.evidence_manifest).write_text(
+        output = Path(args.evidence_manifest)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(
             json.dumps(manifest, indent=2) + "\n",
             encoding="utf-8",
         )
