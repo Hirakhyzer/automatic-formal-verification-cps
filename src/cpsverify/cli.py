@@ -24,7 +24,8 @@ def build_parser():
 
 
 def main(argv=None):
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
     request = VerificationRequest(
         domain=args.domain,
         method=args.method,
@@ -33,7 +34,10 @@ def main(argv=None):
         max_generators=args.max_generators,
         attack_scale=args.attack_scale,
     )
-    report = VerificationEngine().verify(request)
+    try:
+        report = VerificationEngine().verify(request)
+    except ValueError as exc:
+        parser.error(str(exc))
 
     if args.json:
         print(json.dumps(report.to_dict(), indent=2))
